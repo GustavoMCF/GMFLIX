@@ -1,95 +1,129 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageDefault from '../../../components/PageDefault';
 import FormField from '../../../components/FormField';
+import Button from '../../../components/Button';
 
 function CadastroCategoria() {
-
   const valoresIniciais = {
     nome: '',
     descricao: '',
     cor: '',
-  }
+  };
 
   const [categorias, setCategorias] = useState([]);
   const [values, setValues] = useState('valoresIniciais');
 
-  
   function setValue(chave, valor) {
     // chave: nome, descrição
-    setValues ({
+    setValues({
       ...values,
       [chave]: valor, // nome: 'valor'
-    })
+    });
   }
 
   function handleChange(infosDoEvento) {
     setValue(
-      infosDoEvento.target.getAttribute('name'), 
-      infosDoEvento.target.value
-      );
+      infosDoEvento.target.getAttribute('name'),
+      infosDoEvento.target.value,
+    );
   }
+
+  useEffect(() => {
+    const URL_TOP = 'http://localhost:8080/categorias';
+
+    fetch(URL_TOP)
+      .then(async (respostaDoServidor) => {
+        const resposta = await respostaDoServidor.json();
+        setCategorias([
+          ...resposta,
+        ]);
+      });
+  //  setTimeout(() => {
+  //    setCategorias([
+  //      ...categorias,
+  //      {
+  //        id: 1,
+  //        nome: 'Front End',
+  //        descricao: 'Uma categoria braba',
+  //        cor: '#cbd1ff',
+  //      },
+  //      {
+  //        id: 2,
+  //        nome: 'Back End',
+  //        descricao: 'Outra categoria braba',
+  //        cor: '#cbd1ff',
+  //      },
+  //    ]);
+  //  }, 4 * 1000);
+  }, []);
 
   return (
-      <PageDefault>
-        <h1>Cadastro de Categoria: {values.nome}</h1> 
+    <PageDefault>
+      <h1>
+        Cadastro de Categoria:
+        {values.nome}
+      </h1>
 
-        <form onSubmit={function handleSubmit(infosDoEvento){
-            infosDoEvento.preventDefault();
-            setCategorias([
-              ...categorias,
-              values
-            ]);
+      <form onSubmit={function handleSubmit(infosDoEvento) {
+        infosDoEvento.preventDefault();
+        setCategorias([
+          ...categorias,
+          values,
+        ]);
 
-            setValues(valoresIniciais)
-      
-        }}>
+        setValues(valoresIniciais);
+      }}
+      >
 
-          <FormField 
-            label="Nome da Categoria"
-            type="text"
-            name="nome"
-            value={values.nome}
-            onChange={handleChange}
-          />
+        <FormField
+          label="Nome da Categoria"
+          type="text"
+          name="nome"
+          value={values.nome}
+          onChange={handleChange}
+        />
 
-          <FormField 
-            label="Descrição:"
-            type="text"
-            name="descricao"
-            value={values.descricao}
-            onChange={handleChange}
-          />
-          
-          <FormField 
-            label="Cor"
-            type="color"
-            name="cor"
-            value={values.cor}
-            onChange={handleChange}
-          />
-         
-          <button>
-            Cadastrar
-          </button>
-        </form>
+        <FormField
+          label="Descrição"
+          type="textarea"
+          name="descricao"
+          value={values.descricao}
+          onChange={handleChange}
+        />
 
-        <ul>
-          {categorias.map((categoria, indice) => {
-            return (
-              <li key={`${categoria}${indice}`}>
-                {categoria.nome}
-              </li>
-            )
-          })}
-        </ul>
+        <FormField
+          label="Cor"
+          type="color"
+          name="cor"
+          value={values.cor}
+          onChange={handleChange}
+        />
 
+        <Button>
+          Cadastrar
+        </Button>
+      </form>
 
-        <Link to="/">
-         Ir para home
-        </Link> 
-      </PageDefault> 
-    )
-  }
+      {categorias.length === 0 && (
+        <div>
+          Loading...
+        </div>
+      )}
 
-  export default CadastroCategoria;
+      <ul>
+        {categorias.map((categoria) => (
+          <li key={`${categoria.nome}`}>
+            {categoria.nome}
+          </li>
+        ))}
+      </ul>
+
+      <Link to="/">
+        Ir para home
+      </Link>
+    </PageDefault>
+  );
+}
+
+export default CadastroCategoria;
